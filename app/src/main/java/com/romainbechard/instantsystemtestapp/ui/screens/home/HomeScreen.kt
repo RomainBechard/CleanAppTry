@@ -1,7 +1,6 @@
 package com.romainbechard.instantsystemtestapp.ui.screens.home
 
-import androidx.compose.animation.core.MutableTransitionState
-import androidx.compose.animation.core.updateTransition
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -16,12 +15,13 @@ import androidx.compose.material.Card
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -42,8 +42,9 @@ fun HomeScreen(
     val errorState = homeViewModel.errorState.collectAsState().value
     val expandedCardIds = homeViewModel.expandedCardIdsList.collectAsState().value
 
-    if (list.isEmpty()) {
-        homeViewModel.getArticlesList()
+    LaunchedEffect(list) {
+        if (list.isEmpty())
+            homeViewModel.getArticlesList()
     }
     if (errorState) {
         Text("There was an error occured while retrieving your data")
@@ -75,24 +76,27 @@ fun ExpandableArticleCell(
     onClick: (Int) -> Unit = {},
     isExpanded: Boolean
 ) {
+    val uriHandler = LocalUriHandler.current
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClick(index) }
             .padding(horizontal = 8.dp, vertical = 4.dp)
             .clip(RoundedCornerShape(12.dp)),
         elevation = 10.dp
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.background(color = LightBlue)
+            modifier = Modifier
+                .background(color = LightBlue)
+                .animateContentSize()
         ) {
             AsyncImage(
                 model = article.imageUrl,
                 contentDescription = "Article related photo",
                 modifier = Modifier
                     .padding(horizontal = 8.dp, vertical = 4.dp)
-                    .clip(RoundedCornerShape(8.dp)),
+                    .clip(RoundedCornerShape(8.dp))
+                    .clickable { onClick(index) },
                 alignment = Alignment.Center,
                 error = painterResource(id = R.drawable.noimageplaceholder)
             )
@@ -102,23 +106,28 @@ fun ExpandableArticleCell(
                 textAlign = TextAlign.Center,
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
+                modifier = Modifier.clickable { onClick(index) }
             )
-            if (isExpanded){
-                Text(text = article.description)
-            }
-            Surface(
-                modifier = Modifier
-                    .padding(8.dp),
-                shape = CircleShape,
-                color = Purple200
-            ) {
+            if (isExpanded) {
                 Text(
-                    text = if (!isExpanded) "Voir plus" else "Voir moins",
-                    modifier = Modifier
-                        .padding(8.dp)
+                    text = article.description,
+                    textAlign = TextAlign.Center,
+                    fontSize = 14.sp
                 )
+                Surface(
+                    modifier = Modifier
+                        .clickable { uriHandler.openUri(article.articleUrl) }
+                        .padding(8.dp),
+                    shape = CircleShape,
+                    color = Purple200
+                ) {
+                    Text(
+                        text = "Voir plus",
+                        modifier = Modifier
+                            .padding(8.dp)
+                    )
+                }
             }
-
         }
     }
 }
