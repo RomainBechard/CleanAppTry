@@ -16,14 +16,18 @@ class HomeViewModel(
     private val _articlesList: MutableStateFlow<List<Article>> = MutableStateFlow(emptyList())
     val articlesList: StateFlow<List<Article>> = _articlesList
 
+    private val _subjectList: MutableStateFlow<List<String>> = MutableStateFlow(emptyList())
+    val subjectList: StateFlow<List<String>> = _subjectList
+
     private val _expandedCardIdsList = MutableStateFlow(listOf<Int>())
     val expandedCardIdsList: StateFlow<List<Int>> get() = _expandedCardIdsList
 
     private val _errorState: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val errorState: StateFlow<Boolean> = _errorState
 
-    fun getArticlesList() {
+    fun getLists() {
         viewModelScope.launch {
+            _subjectList.emit(repository.getSubjects())
             when(val response = repository.getHeadlines()) {
                 is Result.Success -> {
                     _articlesList.emit(response.data)

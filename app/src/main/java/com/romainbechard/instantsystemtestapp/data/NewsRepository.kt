@@ -25,4 +25,21 @@ class NewsRepository(
             Result.Error(e)
         }
     }
+
+    suspend fun getSearchResult(subject: String): Result<List<Article>> = withContext(dispatcher) {
+        return@withContext try {
+            val list = mutableListOf<Article>()
+            val response = api.getSearchResult(subject = subject, apiKey = BuildConfig.NEWS_API_KEY)
+            response.articles?.forEach{
+                list.add(it.toArticle())
+            }
+            Result.Success(list)
+        } catch (e: HttpException) {
+            Result.Error(e)
+        }
+    }
+
+
+    fun getSubjects(): List<String> =
+        listOf("Sport", "People", "Politique", "Santé", "Divers")
 }
