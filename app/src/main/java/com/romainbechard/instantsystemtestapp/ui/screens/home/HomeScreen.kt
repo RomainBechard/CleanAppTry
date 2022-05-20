@@ -28,6 +28,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.romainbechard.instantsystemtestapp.R
 import com.romainbechard.instantsystemtestapp.data.model.Article
@@ -37,7 +38,7 @@ import com.romainbechard.instantsystemtestapp.ui.theme.Teal200
 
 @Composable
 fun HomeScreen(
-    homeViewModel: HomeViewModel
+    homeViewModel: HomeViewModel = hiltViewModel()
 ) {
 
     val articleList = homeViewModel.articlesList.collectAsState().value

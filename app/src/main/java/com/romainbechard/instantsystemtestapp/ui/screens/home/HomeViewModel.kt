@@ -5,11 +5,14 @@ import androidx.lifecycle.viewModelScope
 import com.romainbechard.instantsystemtestapp.data.NewsRepository
 import com.romainbechard.instantsystemtestapp.data.model.Article
 import com.romainbechard.instantsystemtestapp.data.tools.Result
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class HomeViewModel(
+@HiltViewModel
+class HomeViewModel @Inject constructor(
     private val repository: NewsRepository
 ) : ViewModel() {
 
@@ -74,8 +77,12 @@ class HomeViewModel(
     }
 
     fun onItemClicked(articleIndex: Int) {
-        _expandedCardIdsList.value = _expandedCardIdsList.value.toMutableList().also { list ->
-            if (list.contains(articleIndex)) list.remove(articleIndex) else list.add(articleIndex)
+        if (articleIndex <= expandedCardIdsList.value.lastIndex) {
+            _expandedCardIdsList.value = _expandedCardIdsList.value.toMutableList().also { list ->
+                if (list.contains(articleIndex)) list.remove(articleIndex) else list.add(articleIndex)
+            }
+        } else {
+            _errorState.value = true
         }
     }
 

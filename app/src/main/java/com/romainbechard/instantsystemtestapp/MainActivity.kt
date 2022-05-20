@@ -11,12 +11,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.romainbechard.instantsystemtestapp.ui.screens.home.HomeScreen
 import com.romainbechard.instantsystemtestapp.ui.screens.home.HomeViewModel
 import com.romainbechard.instantsystemtestapp.ui.theme.InstantSystemTestAppTheme
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val application = applicationContext as InstantSystemTestApplication
-        val homeViewModel = HomeViewModel(application.repository)
         setContent {
             InstantSystemTestAppTheme {
                 // A surface container using the 'background' color from the theme
@@ -25,7 +25,7 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier.fillMaxSize(),
                         color = MaterialTheme.colors.background
                     ) {
-                        HomeScreen(homeViewModel = homeViewModel)
+                        HomeScreen()
                     }
                 }
             }
