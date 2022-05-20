@@ -7,10 +7,11 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Card
 import androidx.compose.material.Surface
@@ -23,7 +24,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.semantics.Role.Companion.Image
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
@@ -34,7 +34,7 @@ import com.romainbechard.instantsystemtestapp.R
 import com.romainbechard.instantsystemtestapp.data.model.Article
 import com.romainbechard.instantsystemtestapp.ui.theme.LightBlue
 import com.romainbechard.instantsystemtestapp.ui.theme.Purple200
-import javax.security.auth.Subject
+import com.romainbechard.instantsystemtestapp.ui.theme.Teal200
 
 @Composable
 fun HomeScreen(
@@ -45,11 +45,22 @@ fun HomeScreen(
     val errorState = homeViewModel.errorState.collectAsState().value
     val expandedCardIds = homeViewModel.expandedCardIdsList.collectAsState().value
     val subjectList = homeViewModel.subjectList.collectAsState().value
+    val selectedIndex = homeViewModel.selectedSubject.collectAsState().value
+    val inputText = homeViewModel.input.collectAsState()
 
     LaunchedEffect(subjectList) {
         if (articleList.isEmpty())
-            homeViewModel.getLists()
+            homeViewModel.getDefaultList()
     }
+
+    LaunchedEffect(selectedIndex) {
+        if (selectedIndex == null) {
+            homeViewModel.getDefaultList()
+        } else {
+            homeViewModel.getListFromSubject(subjectList[selectedIndex])
+        }
+    }
+
     if (errorState) {
         Text("There was an error occured while retrieving your data")
     }
@@ -59,8 +70,23 @@ fun HomeScreen(
             .fillMaxSize()
             .background(color = Color.White)
     ) {
-        SearchWidget()
-        SubjectPicker(subjectList = subjectList)
+        SearchWidget(
+            onSearch = { homeViewModel.getListFromSubject(null) },
+            onValueChange = {
+                homeViewModel.setInput(it)
+            },
+            text = inputText
+        )
+        LazyRow {
+            itemsIndexed(subjectList) { index, item ->
+                SubjectCell(
+                    itemClicked = { homeViewModel.onSubjectPicked(index) },
+                    subject = item,
+                    index = index,
+                    selectedIndex = selectedIndex
+                )
+            }
+        }
         LazyColumn {
             itemsIndexed(articleList) { index, article ->
                 ExpandableArticleCell(
@@ -141,24 +167,27 @@ fun ExpandableArticleCell(
 
 @Composable
 fun SearchWidget(
+    onSearch: () -> Unit,
+    onValueChange: (String) -> Unit,
+    text: State<String>
 ) {
-    var text by remember {mutableStateOf("")}
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 16.dp, start = 8.dp, end = 8.dp, bottom = 16.dp)
+            .padding(top = 16.dp, start = 8.dp, end = 8.dp, bottom = 8.dp)
             .wrapContentHeight(),
         shape = RoundedCornerShape(32.dp)
     ) {
         TextField(
-            value = text,
-            onValueChange = { text = it },
+            value = text.value,
+            onValueChange = { onValueChange(it) },
             singleLine = true,
             modifier = Modifier
                 .wrapContentHeight(),
             keyboardOptions = KeyboardOptions(
-                imeAction = ImeAction.Search
+                imeAction = ImeAction.Search,
             ),
+            keyboardActions = KeyboardActions(onSearch = { onSearch() }),
             placeholder = { Text(text = "Search") },
             leadingIcon = {
                 Image(
@@ -171,33 +200,40 @@ fun SearchWidget(
     }
 }
 
-@Composable 
-fun SubjectPicker(subjectList: List<String>) {
-    LazyRow {
-        items(subjectList) {
-            SubjectCell(itemClicked = { /*TODO*/ }, subject = it)
-        }
-    }
-}
-
 @Composable
 fun SubjectCell(
-    itemClicked: () -> Unit,
-    subject: String
+    itemClicked: (Int) -> Unit,
+    subject: String,
+    index: Int,
+    selectedIndex: Int?
 ) {
     Surface(
         modifier = Modifier
-            .clickable { /* animate color*/ }
+            .clickable(onClick = { itemClicked(index) })
             .padding(8.dp)
-            .defaultMinSize(minWidth = 100.dp),
+            .defaultMinSize(minWidth = 100.dp)
+            .animateContentSize(),
         shape = CircleShape,
-        color = Purple200,
+        color = if (selectedIndex == index) Teal200 else Purple200,
     ) {
-        Text(
-            text = subject,
-            modifier = Modifier
-                .padding(8.dp),
-            textAlign = TextAlign.Center
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            if (selectedIndex == index) {
+                Image(
+                    painter = painterResource(id = R.drawable.ic_baseline_check_24),
+                    contentDescription = "Check",
+                    Modifier.padding(horizontal = 4.dp)
+                )
+            }
+            Text(
+                text = subject,
+                modifier = Modifier
+                    .padding(8.dp),
+                textAlign = TextAlign.Center
+            )
+        }
     }
 }
