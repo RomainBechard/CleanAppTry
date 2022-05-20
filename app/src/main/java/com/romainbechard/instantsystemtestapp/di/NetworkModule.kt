@@ -6,7 +6,8 @@ import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.romainbechard.instantsystemtestapp.data.NewsApi
 import com.romainbechard.instantsystemtestapp.data.NewsDataSource
 import com.romainbechard.instantsystemtestapp.data.NewsRepository
-import com.romainbechard.instantsystemtestapp.data.remote.RemoteDataSource
+import com.romainbechard.instantsystemtestapp.data.Repository
+import com.romainbechard.instantsystemtestapp.data.source.remote.RemoteDataSource
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -59,7 +60,7 @@ object RepositoryModule {
     @Provides
     fun provideTasksRepository(
         @AppModule.RemoteDataSource remoteTasksDataSource: NewsDataSource
-    ): NewsRepository {
+    ): Repository {
         return NewsRepository(
             remoteTasksDataSource
         )

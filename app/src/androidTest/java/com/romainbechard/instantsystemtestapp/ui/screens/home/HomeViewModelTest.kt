@@ -1,35 +1,29 @@
 package com.romainbechard.instantsystemtestapp.ui.screens.home
 
-import com.romainbechard.instantsystemtestapp.data.NewsRepository
+import com.romainbechard.instantsystemtestapp.FakeRepository
+import com.romainbechard.instantsystemtestapp.data.Repository
 import org.junit.Before
 import org.junit.Test
-import org.mockito.Mock
 
 class HomeViewModelTest {
 
-    @Mock
     private lateinit var viewModel: HomeViewModel
-    private lateinit var repository: NewsRepository
+    private lateinit var repository: Repository
 
     @Before
     fun setUp() {
+        repository = FakeRepository()
         viewModel = HomeViewModel(repository)
     }
 
     @Test
-    fun getDefaultList() {
-        viewModel.getDefaultList()
-        assert(viewModel.articlesList.value.isNotEmpty())
-    }
-
-    @Test
     fun getListFromSubject() {
-
         viewModel.getListFromSubject(null)
         assert(viewModel.selectedSubject.value == null)
         assert(viewModel.input.value.isNotEmpty())
         assert(!viewModel.errorState.value)
 
+        viewModel.onSubjectPicked(0)
         viewModel.getListFromSubject("Politique")
         assert(viewModel.selectedSubject.value != null)
         assert(!viewModel.errorState.value)
@@ -55,8 +49,13 @@ class HomeViewModelTest {
     @Test
     fun onItemClicked() {
         val articleIndex = 0
-        viewModel.onItemClicked(articleIndex)
-        assert(viewModel.expandedCardIdsList.value.contains(articleIndex))
+        if (!viewModel.expandedCardIdsList.value.contains(articleIndex)) {
+            viewModel.onItemClicked(articleIndex)
+            assert(viewModel.expandedCardIdsList.value.contains(articleIndex) || viewModel.errorState.value)
+        } else {
+            viewModel.onItemClicked(articleIndex)
+            assert(!viewModel.expandedCardIdsList.value.contains(articleIndex))
+        }
 
         viewModel.onItemClicked(viewModel.articlesList.value.lastIndex + 1)
         assert(viewModel.errorState.value)

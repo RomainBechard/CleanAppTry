@@ -1,4 +1,4 @@
-package com.romainbechard.instantsystemtestapp.data.remote
+package com.romainbechard.instantsystemtestapp.data.source.remote
 
 import com.romainbechard.instantsystemtestapp.BuildConfig
 import com.romainbechard.instantsystemtestapp.data.NewsApi

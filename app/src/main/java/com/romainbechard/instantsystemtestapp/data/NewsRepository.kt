@@ -10,12 +10,12 @@ import retrofit2.HttpException
 
 class NewsRepository(
     private val remoteDataSource: NewsDataSource
-) {
+): Repository {
 
-    suspend fun getHeadlines(): Result<List<Article>> = remoteDataSource.getHeadlines()
+    override suspend fun getHeadlines(): Result<List<Article>> = remoteDataSource.getHeadlines()
 
-    suspend fun getSearchResult(subject: String): Result<List<Article>> = remoteDataSource.getSearchResult(subject)
+    override suspend fun getSearchResult(subject: String): Result<List<Article>> = remoteDataSource.getSearchResult(subject)
 
-    fun getSubjects(): List<String> =
+    override fun getSubjects(): List<String> =
         listOf("Sport", "People", "Politique", "Santé", "Divers")
 }

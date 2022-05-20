@@ -3,6 +3,7 @@ package com.romainbechard.instantsystemtestapp.ui.screens.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.romainbechard.instantsystemtestapp.data.NewsRepository
+import com.romainbechard.instantsystemtestapp.data.Repository
 import com.romainbechard.instantsystemtestapp.data.model.Article
 import com.romainbechard.instantsystemtestapp.data.tools.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -13,7 +14,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val repository: NewsRepository
+    private val repository: Repository
 ) : ViewModel() {
 
     private val _articlesList: MutableStateFlow<List<Article>> = MutableStateFlow(emptyList())
