@@ -13,15 +13,14 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.Card
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.material.TextField
+import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -165,12 +164,14 @@ fun ExpandableArticleCell(
 }
 
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun SearchWidget(
     onSearch: () -> Unit,
     onValueChange: (String) -> Unit,
     text: State<String>
 ) {
+    val keyboardController = LocalSoftwareKeyboardController.current
     Surface(
         modifier = Modifier
             .fillMaxWidth()
@@ -187,7 +188,10 @@ fun SearchWidget(
             keyboardOptions = KeyboardOptions(
                 imeAction = ImeAction.Search,
             ),
-            keyboardActions = KeyboardActions(onSearch = { onSearch() }),
+            keyboardActions = KeyboardActions(onSearch = {
+                keyboardController?.hide()
+                onSearch()
+            }),
             placeholder = { Text(text = "Search") },
             leadingIcon = {
                 Image(
